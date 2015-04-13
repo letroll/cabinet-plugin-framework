@@ -83,4 +83,9 @@ public class ServiceExample extends PluginService {
     protected PluginService getService() {
         return this;
     }
+
+    @Override
+    protected int getForegroundId() {
+        return 4001;
+    }
 }

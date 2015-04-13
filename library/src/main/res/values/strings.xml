@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">cabinet-plugin-framework</string>
+    <string name="exit">Exit</string>
+    <string name="connecting">Connecting…</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
 </resources>

@@ -1,15 +1,20 @@
 package com.afollestad.cabinet.plugins;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -18,6 +23,7 @@ import java.util.List;
  */
 public abstract class PluginService extends Service {
 
+    private final static String EXIT_ACTION = "com.afollestad.cabinet.plugins.EXIT";
     private Messenger mMessenger;
 
     class MessageHandler extends Handler {
@@ -27,14 +33,13 @@ public abstract class PluginService extends Service {
                 PluginAction action = PluginAction.valueOf(msg.what);
                 switch (action) {
                     case CONNECT: {
+                        mMessenger = msg.replyTo;
                         if (authenticationNeeded()) {
                             // Authentication needed
-                            mMessenger = msg.replyTo;
                             startActivity(getAuthenticatorIntent());
                         } else {
                             // Authentication not needed, connect now
-                            connect();
-                            respond(msg.replyTo, PluginAction.CONNECT, null, null);
+                            performConnect();
                         }
                         break;
                     }
@@ -85,6 +90,8 @@ public abstract class PluginService extends Service {
                     case DISCONNECT:
                         disconnect();
                         respond(msg.replyTo, PluginAction.DISCONNECT, null, null);
+                        stopForeground(true);
+                        stopSelf();
                         break;
                 }
             } catch (Exception e) {
@@ -118,15 +125,47 @@ public abstract class PluginService extends Service {
         if (intent.getAction() != null &&
                 PluginAuthenticator.AUTHENTICATED_ACTION.equals(intent.getAction())) {
             // Authentication was finished, connect now
-            try {
-                connect();
-                respond(mMessenger, PluginAction.CONNECT, null, null);
-            } catch (Exception e) {
-                respond(mMessenger, PluginAction.ERROR, e.getLocalizedMessage(), null);
-            }
-            mMessenger = null;
+            performConnect();
         }
         return START_STICKY;
+    }
+
+    private void performConnect() {
+        refreshNotification(getString(R.string.connecting));
+        try {
+            connect();
+            respond(mMessenger, PluginAction.CONNECT, null, null);
+            refreshNotification(getString(R.string.connected));
+        } catch (Exception e) {
+            respond(mMessenger, PluginAction.ERROR, e.getLocalizedMessage(), null);
+        }
+        mMessenger = null;
+    }
+
+    private void refreshNotification(String status) {
+        if (status == null)
+            status = getString(R.string.disconnected);
+        try {
+            PackageManager pm = getPackageManager();
+            ServiceInfo info = pm.getServiceInfo(getComponentName(), PackageManager.GET_SERVICES);
+            PendingIntent mainIntent = PendingIntent.getActivity(this, 1001,
+                    new Intent(Intent.ACTION_MAIN)
+                            .setComponent(new ComponentName("com.afollestad.cabinet", "ui.MainActivity")),
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent exitIntent = PendingIntent.getService(this, 1002,
+                    new Intent(EXIT_ACTION).setComponent(getComponentName()),
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                    .setContentTitle(info.loadLabel(pm))
+                    .setContentText(status)
+                    .setSmallIcon(info.getIconResource())
+                    .setContentIntent(mainIntent)
+                    .addAction(R.drawable.ic_stat_navigation_close,
+                            getString(R.string.exit), exitIntent);
+            startForeground(getForegroundId(), builder.build());
+        } catch (Exception e) {
+            Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     protected abstract void connect() throws Exception;
@@ -157,11 +196,16 @@ public abstract class PluginService extends Service {
 
     protected abstract PluginService getService();
 
-    private Intent getAuthenticatorIntent() {
+    protected abstract int getForegroundId();
+
+    private ComponentName getComponentName() {
         PluginService service = getService();
+        return new ComponentName(service.getPackageName(), service.getClass().getName());
+    }
+
+    private Intent getAuthenticatorIntent() {
         return authenticator()
-                .putExtra(PluginAuthenticator.TARGET_COMPONENT,
-                        new ComponentName(service.getPackageName(), service.getClass().getName()).flattenToString())
+                .putExtra(PluginAuthenticator.TARGET_COMPONENT, getComponentName().flattenToString())
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
