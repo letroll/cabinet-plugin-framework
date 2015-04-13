@@ -16,7 +16,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * @author Aidan Follestad (afollestad)
@@ -47,8 +47,9 @@ public abstract class PluginService extends Service {
                         if (msg.getData() == null || !msg.getData().containsKey("path"))
                             throw new Exception("Expected data containing a path");
                         String path = msg.getData().get("path").toString();
-                        List<PluginFile> results = listFiles(path);
-                        respond(msg.replyTo, PluginAction.LIST, results, msg.getData());
+                        ArrayList<PluginFile> results = listFiles(path);
+                        msg.getData().putParcelableArrayList("results", results);
+                        respond(msg.replyTo, PluginAction.LIST, msg.getData());
                         break;
                     }
                     case CREATE: {
@@ -59,7 +60,7 @@ public abstract class PluginService extends Service {
                             newFile(path);
                         else
                             mkDir(path);
-                        respond(msg.replyTo, PluginAction.CREATE, null, msg.getData());
+                        respond(msg.replyTo, PluginAction.CREATE, msg.getData());
                         break;
                     }
                     case COPY: {
@@ -71,7 +72,7 @@ public abstract class PluginService extends Service {
                             copyFile(source, dest);
                         else
                             copyDir(source, dest);
-                        respond(msg.replyTo, PluginAction.COPY, null, msg.getData());
+                        respond(msg.replyTo, PluginAction.COPY, msg.getData());
                         break;
                     }
                     case MOVE: {
@@ -83,7 +84,7 @@ public abstract class PluginService extends Service {
                             moveFile(source, dest);
                         else
                             moveDir(source, dest);
-                        respond(msg.replyTo, PluginAction.MOVE, null, msg.getData());
+                        respond(msg.replyTo, PluginAction.MOVE, msg.getData());
                         break;
                     }
                     case DELETE: {
@@ -94,12 +95,12 @@ public abstract class PluginService extends Service {
                             rmFile(path);
                         else
                             rmDir(path);
-                        respond(msg.replyTo, PluginAction.DELETE, null, msg.getData());
+                        respond(msg.replyTo, PluginAction.DELETE, msg.getData());
                         break;
                     }
                     case DISCONNECT:
                         disconnect();
-                        respond(msg.replyTo, PluginAction.DISCONNECT, null, null);
+                        respond(msg.replyTo, PluginAction.DISCONNECT, null);
                         stopForeground(true);
                         stopSelf();
                         break;
@@ -107,7 +108,7 @@ public abstract class PluginService extends Service {
             } catch (Exception e) {
                 log("Receive Error: " + e.getLocalizedMessage());
                 if (msg.replyTo != null)
-                    respond(msg.replyTo, PluginAction.ERROR, e.getLocalizedMessage(), null);
+                    error(msg.replyTo, e.getLocalizedMessage());
             }
         }
     }
@@ -150,10 +151,10 @@ public abstract class PluginService extends Service {
         refreshNotification(getString(R.string.connecting));
         try {
             connect();
-            respond(mMessenger, PluginAction.CONNECT, null, null);
+            respond(mMessenger, PluginAction.CONNECT, null);
             refreshNotification(getString(R.string.connected));
         } catch (Exception e) {
-            respond(mMessenger, PluginAction.ERROR, e.getLocalizedMessage(), null);
+            error(mMessenger, e.getLocalizedMessage());
         }
         mMessenger = null;
     }
@@ -186,7 +187,7 @@ public abstract class PluginService extends Service {
 
     protected abstract void connect() throws Exception;
 
-    protected abstract List<PluginFile> listFiles(String path) throws Exception;
+    protected abstract ArrayList<PluginFile> listFiles(String path) throws Exception;
 
     protected abstract void newFile(String path) throws Exception;
 
@@ -225,10 +226,16 @@ public abstract class PluginService extends Service {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
-    private void respond(Messenger responder, PluginAction action, Object obj, Bundle data) {
+    private void error(Messenger responder, String err) {
+        Bundle args = new Bundle();
+        args.putString("error", err);
+        respond(responder, PluginAction.ERROR, args);
+    }
+
+    private void respond(Messenger responder, PluginAction action, Bundle data) {
         if (responder == null)
             throw new IllegalStateException("Plugin service is not connected.");
-        Message msg = Message.obtain(null, action.value(), obj);
+        Message msg = Message.obtain(null, action.value());
         if (data != null)
             msg.setData(data);
         try {
