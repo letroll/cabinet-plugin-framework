@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import com.afollestad.cabinet.plugins.PluginFile;
 import com.afollestad.cabinet.plugins.PluginService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,7 +21,14 @@ public class ServiceExample extends PluginService {
 
     @Override
     protected List<PluginFile> listFiles(String path) throws Exception {
-        return null;
+        List<PluginFile> results = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            results.add(new PluginFile.Builder(this)
+                    .path("/example/file" + i)
+                    .thumbnail("/example/thumbnail" + i)
+                    .build());
+        }
+        return results;
     }
 
     @Override
