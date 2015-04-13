@@ -1,5 +1,7 @@
 <resources>
-    <string name="app_name">cabinet-plugin-framework</string>
+
+    <string name="app_name">Cabinet Plugin Example</string>
     <string name="plugin_authenticator">Plugin Authenticator</string>
     <string name="plugin_example">Cabinet Plugin Example</string>
+
 </resources>
