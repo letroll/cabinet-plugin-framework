@@ -13,10 +13,12 @@ public class AuthenticatorExample extends PluginAuthenticator {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_authenticatorexample);
+
+        // Simulates a 3 second loading period
         new Thread(new Runnable() {
             @Override
             public void run() {
-                // Simulates a 3 second loading period
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {

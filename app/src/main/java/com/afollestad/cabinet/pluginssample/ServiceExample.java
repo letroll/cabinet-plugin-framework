@@ -1,8 +1,8 @@
 package com.afollestad.cabinet.pluginssample;
 
+import android.content.Intent;
 import android.preference.PreferenceManager;
 
-import com.afollestad.cabinet.plugins.PluginAuthenticator;
 import com.afollestad.cabinet.plugins.PluginFile;
 import com.afollestad.cabinet.plugins.PluginService;
 
@@ -75,7 +75,12 @@ public class ServiceExample extends PluginService {
     }
 
     @Override
-    protected Class<? extends PluginAuthenticator> authenticator() {
-        return AuthenticatorExample.class;
+    protected Intent authenticator() {
+        return new Intent(this, AuthenticatorExample.class);
+    }
+
+    @Override
+    protected PluginService getService() {
+        return this;
     }
 }
