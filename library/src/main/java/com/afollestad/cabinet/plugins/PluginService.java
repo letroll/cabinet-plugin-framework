@@ -44,12 +44,16 @@ public abstract class PluginService extends Service {
                         break;
                     }
                     case LIST: {
+                        if (msg.getData() == null || !msg.getData().containsKey("path"))
+                            throw new Exception("Expected data containing a path");
                         String path = msg.getData().get("path").toString();
                         List<PluginFile> results = listFiles(path);
                         respond(msg.replyTo, PluginAction.LIST, results, msg.getData());
                         break;
                     }
                     case CREATE: {
+                        if (msg.getData() == null || !msg.getData().containsKey("path"))
+                            throw new Exception("Expected data containing a type and path");
                         String path = msg.getData().get("path").toString();
                         if (msg.getData().get("type").toString().equals("file"))
                             newFile(path);
@@ -59,6 +63,8 @@ public abstract class PluginService extends Service {
                         break;
                     }
                     case COPY: {
+                        if (msg.getData() == null || !msg.getData().containsKey("source") || !msg.getData().containsKey("dest"))
+                            throw new Exception("Expected data containing a source and dest");
                         String source = msg.getData().get("source").toString();
                         String dest = msg.getData().get("dest").toString();
                         if (msg.getData().get("type").toString().equals("file"))
@@ -69,6 +75,8 @@ public abstract class PluginService extends Service {
                         break;
                     }
                     case MOVE: {
+                        if (msg.getData() == null || !msg.getData().containsKey("source") || !msg.getData().containsKey("dest"))
+                            throw new Exception("Expected data containing a source and dest");
                         String source = msg.getData().get("source").toString();
                         String dest = msg.getData().get("dest").toString();
                         if (msg.getData().get("type").toString().equals("file"))
@@ -79,6 +87,8 @@ public abstract class PluginService extends Service {
                         break;
                     }
                     case DELETE: {
+                        if (msg.getData() == null || !msg.getData().containsKey("path"))
+                            throw new Exception("Expected data containing a type and path");
                         String path = msg.getData().get("path").toString();
                         if (msg.getData().get("type").toString().equals("file"))
                             rmFile(path);
@@ -123,11 +133,15 @@ public abstract class PluginService extends Service {
 
     @Override
     public final int onStartCommand(Intent intent, int flags, int startId) {
-        log("Received: " + intent.getAction());
-        if (intent.getAction() != null &&
-                PluginAuthenticator.AUTHENTICATED_ACTION.equals(intent.getAction())) {
-            // Authentication was finished, connect now
-            performConnect();
+        if (intent != null) {
+            log("Received: " + intent.getAction());
+            if (intent.getAction() != null &&
+                    PluginAuthenticator.AUTHENTICATED_ACTION.equals(intent.getAction())) {
+                // Authentication was finished, connect now
+                performConnect();
+            }
+        } else {
+            log("Received: null intent");
         }
         return START_STICKY;
     }
