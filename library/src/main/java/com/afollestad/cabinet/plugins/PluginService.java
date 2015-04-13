@@ -95,7 +95,9 @@ public abstract class PluginService extends Service {
                         break;
                 }
             } catch (Exception e) {
-                respond(msg.replyTo, PluginAction.ERROR, e.getLocalizedMessage(), null);
+                log("Receive Error: " + e.getLocalizedMessage());
+                if (msg.replyTo != null)
+                    respond(msg.replyTo, PluginAction.ERROR, e.getLocalizedMessage(), null);
             }
         }
     }
