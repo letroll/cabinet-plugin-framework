@@ -2,12 +2,14 @@ package com.afollestad.cabinet.plugins;
 
 import android.os.Bundle;
 
+import java.io.Serializable;
+
 /**
  * Used to store file objects that are sent from the plugin service to the main app.
  *
  * @author Aidan Follestad (afollestad)
  */
-public class PluginFile {
+public class PluginFile implements Serializable {
 
     private static final String PACKAGE = "package";
     private static final String PATH = "path";
@@ -49,5 +51,10 @@ public class PluginFile {
 
     public Bundle getArgs() {
         return args;
+    }
+
+    @Override
+    public String toString() {
+        return getArgs().toString();
     }
 }
