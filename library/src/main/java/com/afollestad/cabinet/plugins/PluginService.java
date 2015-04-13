@@ -226,7 +226,7 @@ public abstract class PluginService extends Service {
     }
 
     private void respond(Messenger responder, PluginAction action, Object obj, Bundle data) {
-        if (mMessenger == null)
+        if (responder == null)
             throw new IllegalStateException("Plugin service is not connected.");
         Message msg = Message.obtain(null, action.value(), obj);
         if (data != null)
