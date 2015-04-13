@@ -7,7 +7,6 @@ import com.afollestad.cabinet.plugins.PluginFile;
 import com.afollestad.cabinet.plugins.PluginService;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Aidan Follestad (afollestad)
@@ -20,12 +19,15 @@ public class ServiceExample extends PluginService {
     }
 
     @Override
-    protected List<PluginFile> listFiles(String path) throws Exception {
-        List<PluginFile> results = new ArrayList<>();
+    protected ArrayList<PluginFile> listFiles(String path) throws Exception {
+        ArrayList<PluginFile> results = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             results.add(new PluginFile.Builder(this)
                     .path("/example/file" + i)
                     .thumbnail("/example/thumbnail" + i)
+                    .created(System.currentTimeMillis())
+                    .modified(System.currentTimeMillis())
+                    .isDir((i % 3) == 0)
                     .build());
         }
         return results;
