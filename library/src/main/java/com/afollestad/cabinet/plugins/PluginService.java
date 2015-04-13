@@ -207,12 +207,29 @@ public abstract class PluginService extends Service {
 
     protected abstract void disconnect() throws Exception;
 
+    /**
+     * If you're using a web service like Google Drive, you'll need to authenticate the user before
+     * files can be accessed. Return true if the user is not already authenticated, the Intent returned
+     * in authenticator() will be launched as an Activity.
+     */
     protected abstract boolean authenticationNeeded();
 
+    /**
+     * Return an Intent that can be used to start your Authenticator Activity.
+     */
     protected abstract Intent authenticator();
 
+    /**
+     * Generally, just return 'this'. Used to get the context, package name, etc. of your plugin
+     * rather than the context if the plugin framework library.
+     */
     protected abstract PluginService getService();
 
+    /**
+     * The ID used for the persistent foreground notification that keeps the service running
+     * indefinitely until disconnection. If you have multiple services in your plugin, each need a
+     * unique ID.
+     */
     protected abstract int getForegroundId();
 
     private ComponentName getComponentName() {
