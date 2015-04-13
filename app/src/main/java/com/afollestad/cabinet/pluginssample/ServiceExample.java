@@ -34,22 +34,22 @@ public class ServiceExample extends PluginService {
     }
 
     @Override
-    protected void copyFile(String source, String dest) {
+    protected void copyFile(String source, String dest) throws Exception {
 
     }
 
     @Override
-    protected void copyDir(String source, String dest) {
+    protected void copyDir(String source, String dest) throws Exception {
 
     }
 
     @Override
-    protected void moveFile(String source, String dest) {
+    protected void moveFile(String source, String dest) throws Exception {
 
     }
 
     @Override
-    protected void moveDir(String source, String dest) {
+    protected void moveDir(String source, String dest) throws Exception {
 
     }
 

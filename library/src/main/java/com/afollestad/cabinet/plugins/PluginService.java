@@ -137,13 +137,13 @@ public abstract class PluginService extends Service {
 
     protected abstract void mkDir(String path) throws Exception;
 
-    protected abstract void copyFile(String source, String dest);
+    protected abstract void copyFile(String source, String dest) throws Exception;
 
-    protected abstract void copyDir(String source, String dest);
+    protected abstract void copyDir(String source, String dest) throws Exception;
 
-    protected abstract void moveFile(String source, String dest);
+    protected abstract void moveFile(String source, String dest) throws Exception;
 
-    protected abstract void moveDir(String source, String dest);
+    protected abstract void moveDir(String source, String dest) throws Exception;
 
     protected abstract void rmFile(String path) throws Exception;
 
