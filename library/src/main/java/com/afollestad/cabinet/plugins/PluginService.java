@@ -18,26 +18,30 @@ import java.util.List;
  */
 public abstract class PluginService extends Service {
 
+    private Messenger mMessenger;
+
     class MessageHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            mSender = msg.replyTo;
             try {
                 PluginAction action = PluginAction.valueOf(msg.what);
                 switch (action) {
-                    case CONNECT:
+                    case CONNECT: {
                         if (authenticationNeeded()) {
                             // Authentication needed
+                            mMessenger = msg.replyTo;
                             startActivity(getAuthenticatorIntent());
                         } else {
                             // Authentication not needed, connect now
                             connect();
+                            respond(msg.replyTo, PluginAction.CONNECT, null, null);
                         }
                         break;
+                    }
                     case LIST: {
                         String path = msg.getData().get("path").toString();
                         List<PluginFile> results = listFiles(path);
-                        respond(PluginAction.LIST, results, msg.getData());
+                        respond(msg.replyTo, PluginAction.LIST, results, msg.getData());
                         break;
                     }
                     case CREATE: {
@@ -46,7 +50,7 @@ public abstract class PluginService extends Service {
                             newFile(path);
                         else
                             mkDir(path);
-                        respond(PluginAction.CREATE, null, msg.getData());
+                        respond(msg.replyTo, PluginAction.CREATE, null, msg.getData());
                         break;
                     }
                     case COPY: {
@@ -56,7 +60,7 @@ public abstract class PluginService extends Service {
                             copyFile(source, dest);
                         else
                             copyDir(source, dest);
-                        respond(PluginAction.COPY, null, msg.getData());
+                        respond(msg.replyTo, PluginAction.COPY, null, msg.getData());
                         break;
                     }
                     case MOVE: {
@@ -66,7 +70,7 @@ public abstract class PluginService extends Service {
                             moveFile(source, dest);
                         else
                             moveDir(source, dest);
-                        respond(PluginAction.MOVE, null, msg.getData());
+                        respond(msg.replyTo, PluginAction.MOVE, null, msg.getData());
                         break;
                     }
                     case DELETE: {
@@ -75,21 +79,20 @@ public abstract class PluginService extends Service {
                             rmFile(path);
                         else
                             rmDir(path);
-                        respond(PluginAction.DELETE, null, msg.getData());
+                        respond(msg.replyTo, PluginAction.DELETE, null, msg.getData());
                         break;
                     }
                     case DISCONNECT:
                         disconnect();
-                        respond(PluginAction.DISCONNECT, null, null);
+                        respond(msg.replyTo, PluginAction.DISCONNECT, null, null);
                         break;
                 }
             } catch (Exception e) {
-                respond(PluginAction.ERROR, e.getLocalizedMessage(), null);
+                respond(msg.replyTo, PluginAction.ERROR, e.getLocalizedMessage(), null);
             }
         }
     }
 
-    private Messenger mSender;
     private final Messenger mReceiver = new Messenger(new MessageHandler());
     private final static boolean DEBUG = true;
 
@@ -117,9 +120,11 @@ public abstract class PluginService extends Service {
             // Authentication was finished, connect now
             try {
                 connect();
+                respond(mMessenger, PluginAction.CONNECT, null, null);
             } catch (Exception e) {
-                respond(PluginAction.ERROR, e.getLocalizedMessage(), null);
+                respond(mMessenger, PluginAction.ERROR, e.getLocalizedMessage(), null);
             }
+            mMessenger = null;
         }
         return START_STICKY;
     }
@@ -160,14 +165,14 @@ public abstract class PluginService extends Service {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
-    private void respond(PluginAction action, Object obj, Bundle data) {
-        if (mSender == null)
+    private void respond(Messenger responder, PluginAction action, Object obj, Bundle data) {
+        if (mMessenger == null)
             throw new IllegalStateException("Plugin service is not connected.");
         Message msg = Message.obtain(null, action.value(), obj);
         if (data != null)
             msg.setData(data);
         try {
-            mSender.send(msg);
+            responder.send(msg);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
