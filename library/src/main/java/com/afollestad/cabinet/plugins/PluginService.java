@@ -159,7 +159,6 @@ public abstract class PluginService extends Service {
         } catch (Exception e) {
             error(mMessenger, e.getLocalizedMessage());
         }
-        mMessenger = null;
     }
 
     private void performDisconnect() {
@@ -172,7 +171,6 @@ public abstract class PluginService extends Service {
         } catch (Exception e) {
             error(mMessenger, e.getLocalizedMessage());
         }
-        mMessenger = null;
     }
 
     private void refreshNotification(String status) {
