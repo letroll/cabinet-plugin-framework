@@ -28,7 +28,7 @@ publish {
     userOrg = 'drummer-aidan'
     groupId = 'com.afollestad'
     artifactId = 'cabinet-plugin-framework'
-    version = '0.0.1'
+    version = '0.0.2'
     description = 'A plugin framework for Cabinet File Manager, allowing 3rd parties to extend the functionality of Cabinet.'
     website = 'https://github.com/afollestad/cabinet-plugin-framework'
     issueTracker = "${website}/issues"
