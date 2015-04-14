@@ -99,12 +99,11 @@ public abstract class PluginService extends Service {
                         respond(msg.replyTo, PluginAction.DELETE, msg.getData());
                         break;
                     }
-                    case DISCONNECT:
-                        disconnect();
-                        respond(msg.replyTo, PluginAction.DISCONNECT, null);
-                        stopForeground(true);
-                        stopSelf();
+                    case DISCONNECT: {
+                        mMessenger = msg.replyTo;
+                        performDisconnect();
                         break;
+                    }
                 }
             } catch (Exception e) {
                 log("Receive Error: " + e.getLocalizedMessage());
@@ -137,10 +136,13 @@ public abstract class PluginService extends Service {
     public final int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             log("Received: " + intent.getAction());
-            if (intent.getAction() != null &&
-                    PluginAuthenticator.AUTHENTICATED_ACTION.equals(intent.getAction())) {
-                // Authentication was finished, connect now
-                performConnect();
+            if (intent.getAction() != null) {
+                if (PluginAuthenticator.AUTHENTICATED_ACTION.equals(intent.getAction())) {
+                    // Authentication was finished, connect now
+                    performConnect();
+                } else if (EXIT_ACTION.equals(intent.getAction())) {
+                    performDisconnect();
+                }
             }
         } else {
             log("Received: null intent");
@@ -160,6 +162,19 @@ public abstract class PluginService extends Service {
         mMessenger = null;
     }
 
+    private void performDisconnect() {
+        try {
+            disconnect();
+            if (mMessenger != null)
+                respond(mMessenger, PluginAction.DISCONNECT, null);
+            stopForeground(true);
+            stopSelf();
+        } catch (Exception e) {
+            error(mMessenger, e.getLocalizedMessage());
+        }
+        mMessenger = null;
+    }
+
     private void refreshNotification(String status) {
         if (status == null)
             status = getString(R.string.disconnected);
@@ -168,7 +183,7 @@ public abstract class PluginService extends Service {
             ServiceInfo info = pm.getServiceInfo(getComponentName(), PackageManager.GET_SERVICES);
             PendingIntent mainIntent = PendingIntent.getActivity(this, 1001,
                     new Intent(Intent.ACTION_MAIN)
-                            .setComponent(new ComponentName("com.afollestad.cabinet", "ui.MainActivity")),
+                            .setComponent(new ComponentName("com.afollestad.cabinet", "com.afollestad.cabinet.ui.MainActivity")),
                     PendingIntent.FLAG_CANCEL_CURRENT);
             PendingIntent exitIntent = PendingIntent.getService(this, 1002,
                     new Intent(EXIT_ACTION).setComponent(getComponentName()),
