@@ -131,10 +131,7 @@ public abstract class PluginService extends Service {
         if (intent != null) {
             log("Received: " + intent.getAction());
             if (intent.getAction() != null) {
-                if (PluginConstants.QUERY_ACTION.equals(intent.getAction())) {
-                    // Check for authentication, and connect if possible
-                    tryConnect();
-                } else if (PluginAuthenticator.AUTHENTICATED_ACTION.equals(intent.getAction())) {
+                if (PluginAuthenticator.AUTHENTICATED_ACTION.equals(intent.getAction())) {
                     // Authentication was finished, connect now
                     performConnect();
                 } else if (EXIT_ACTION.equals(intent.getAction())) {
