@@ -21,7 +21,7 @@ public class ServiceExample extends PluginService {
     @Override
     protected ArrayList<PluginFile> listFiles(String path) throws Exception {
         ArrayList<PluginFile> results = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000; i++) {
             results.add(new PluginFile.Builder(this)
                     .path("/example/file" + i)
                     .thumbnail("/example/thumbnail" + i)
