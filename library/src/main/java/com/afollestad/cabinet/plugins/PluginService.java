@@ -157,7 +157,9 @@ public abstract class PluginService extends Service {
             respond(mMessenger, PluginAction.CONNECT, null);
             refreshNotification(getString(R.string.connected));
         } catch (Exception e) {
-            error(mMessenger, e.getLocalizedMessage());
+            log("Connect error: " + e.getLocalizedMessage());
+            if (mMessenger != null)
+                error(mMessenger, e.getLocalizedMessage());
         }
     }
 
@@ -169,7 +171,9 @@ public abstract class PluginService extends Service {
             stopForeground(true);
             stopSelf();
         } catch (Exception e) {
-            error(mMessenger, e.getLocalizedMessage());
+            log("Disconnect error: " + e.getLocalizedMessage());
+            if (mMessenger != null)
+                error(mMessenger, e.getLocalizedMessage());
         }
     }
 
