@@ -17,6 +17,8 @@ public class PluginFile implements Parcelable {
     public static final String CREATED = "created";
     public static final String MODIFIED = "modified";
     public static final String IS_DIR = "is_dir";
+    public static final String LENGTH = "length";
+    public static final String HIDDEN = "hidden";
 
     private Bundle args;
 
@@ -31,6 +33,8 @@ public class PluginFile implements Parcelable {
         args.putLong(CREATED, builder.created);
         args.putLong(MODIFIED, builder.modified);
         args.putBoolean(IS_DIR, builder.isDir);
+        args.putLong(LENGTH, builder.length);
+        args.putBoolean(HIDDEN, builder.hidden);
     }
 
     public PluginFile(Parcel in) {
@@ -67,6 +71,8 @@ public class PluginFile implements Parcelable {
         protected long created;
         protected long modified;
         protected boolean isDir;
+        protected long length;
+        protected boolean hidden;
 
         public Builder(PluginService service) {
             packageName = service.getPackageName();
@@ -97,9 +103,35 @@ public class PluginFile implements Parcelable {
             return this;
         }
 
+        public Builder length(long length) {
+            this.length = length;
+            return this;
+        }
+
+        public Builder hidden(boolean hidden) {
+            this.hidden = hidden;
+            return this;
+        }
+
         public PluginFile build() {
             return new PluginFile(this);
         }
+    }
+
+    public String getString(String key) {
+        return getArgs().getString(key);
+    }
+
+    public long getLong(String key) {
+        return getArgs().getLong(key);
+    }
+
+    public boolean getBoolean(String key) {
+        return getArgs().getBoolean(key);
+    }
+
+    public boolean getBoolean(String key, boolean fallback) {
+        return getArgs().getBoolean(key, fallback);
     }
 
     public Bundle getArgs() {
@@ -108,6 +140,8 @@ public class PluginFile implements Parcelable {
 
     @Override
     public String toString() {
-        return getArgs().toString();
+        if (getArgs() != null)
+            return args.getString(PATH) + " (is_dir=" + args.getBoolean(IS_DIR) + ")";
+        return "(null)";
     }
 }
