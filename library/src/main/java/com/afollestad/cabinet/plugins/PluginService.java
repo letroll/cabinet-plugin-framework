@@ -34,13 +34,7 @@ public abstract class PluginService extends Service {
                 switch (action) {
                     case CONNECT: {
                         mMessenger = msg.replyTo;
-                        if (authenticationNeeded()) {
-                            // Authentication needed
-                            startActivity(getAuthenticatorIntent());
-                        } else {
-                            // Authentication not needed, connect now
-                            performConnect();
-                        }
+                        tryConnect();
                         break;
                     }
                     case LIST: {
@@ -137,7 +131,10 @@ public abstract class PluginService extends Service {
         if (intent != null) {
             log("Received: " + intent.getAction());
             if (intent.getAction() != null) {
-                if (PluginAuthenticator.AUTHENTICATED_ACTION.equals(intent.getAction())) {
+                if (PluginConstants.QUERY_ACTION.equals(intent.getAction())) {
+                    // Check for authentication, and connect if possible
+                    tryConnect();
+                } else if (PluginAuthenticator.AUTHENTICATED_ACTION.equals(intent.getAction())) {
                     // Authentication was finished, connect now
                     performConnect();
                 } else if (EXIT_ACTION.equals(intent.getAction())) {
@@ -148,6 +145,16 @@ public abstract class PluginService extends Service {
             log("Received: null intent");
         }
         return START_STICKY;
+    }
+
+    private void tryConnect() {
+        if (authenticationNeeded()) {
+            // Authentication needed
+            startActivity(getAuthenticatorIntent());
+        } else {
+            // Authentication not needed, connect now
+            performConnect();
+        }
     }
 
     private void performConnect() {
