@@ -48,7 +48,8 @@ public abstract class PluginService extends Service {
                             throw new Exception("Expected data containing a path");
                         String path = msg.getData().get("path").toString();
                         ArrayList<PluginFile> results = listFiles(path);
-                        msg.getData().putParcelableArrayList("results", results);
+                        msg.getData().putParcelableArrayList("results",
+                                PluginFile.bundleArrayFromFileArray(results));
                         respond(msg.replyTo, PluginAction.LIST, msg.getData());
                         break;
                     }
