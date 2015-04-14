@@ -150,6 +150,7 @@ public abstract class PluginService extends Service {
     private void tryConnect() {
         if (authenticationNeeded()) {
             // Authentication needed
+            refreshNotification(getString(R.string.authenticating));
             startActivity(getAuthenticatorIntent());
         } else {
             // Authentication not needed, connect now
@@ -167,6 +168,7 @@ public abstract class PluginService extends Service {
             log("Connect error: " + e.getLocalizedMessage());
             if (mMessenger != null)
                 error(mMessenger, e.getLocalizedMessage());
+            refreshNotification(getString(R.string.connect_error));
         }
     }
 
