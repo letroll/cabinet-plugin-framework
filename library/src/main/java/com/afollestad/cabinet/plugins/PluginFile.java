@@ -1,15 +1,15 @@
 package com.afollestad.cabinet.plugins;
 
 import android.os.Bundle;
-
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Used to store file objects that are sent from the plugin service to the main app.
  *
  * @author Aidan Follestad (afollestad)
  */
-public class PluginFile implements Serializable {
+public class PluginFile implements Parcelable {
 
     public static final String PACKAGE = "package";
     public static final String PATH = "path";
@@ -20,7 +20,7 @@ public class PluginFile implements Serializable {
 
     private Bundle args;
 
-    private PluginFile() {
+    public PluginFile() {
     }
 
     private PluginFile(Builder builder) {
@@ -32,6 +32,32 @@ public class PluginFile implements Serializable {
         args.putLong(MODIFIED, builder.modified);
         args.putBoolean(IS_DIR, builder.isDir);
     }
+
+    public PluginFile(Parcel in) {
+        args = in.readBundle();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeBundle(args);
+    }
+
+    public static final Parcelable.Creator<PluginFile> CREATOR = new
+            Parcelable.Creator<PluginFile>() {
+                public PluginFile createFromParcel(Parcel in) {
+                    return new PluginFile(in);
+                }
+
+                public PluginFile[] newArray(int size) {
+                    return new PluginFile[size];
+                }
+            };
+
 
     public static class Builder {
 
