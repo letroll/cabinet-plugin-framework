@@ -2,14 +2,14 @@ package com.afollestad.cabinet.plugins;
 
 import android.os.Bundle;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 
 /**
  * Used to store file objects that are sent from the plugin service to the main app.
  *
  * @author Aidan Follestad (afollestad)
  */
-public class PluginFile {
+public class PluginFile implements Serializable {
 
     public static final String PACKAGE = "package";
     public static final String PATH = "path";
@@ -20,6 +20,9 @@ public class PluginFile {
 
     private Bundle args;
 
+    private PluginFile() {
+    }
+
     private PluginFile(Builder builder) {
         args = new Bundle();
         args.putString(PACKAGE, builder.packageName);
@@ -28,17 +31,6 @@ public class PluginFile {
         args.putLong(CREATED, builder.created);
         args.putLong(MODIFIED, builder.modified);
         args.putBoolean(IS_DIR, builder.isDir);
-    }
-
-    public PluginFile(Bundle args) {
-        this.args = args;
-    }
-
-    public static ArrayList<Bundle> bundleArrayFromFileArray(ArrayList<PluginFile> files) {
-        ArrayList<Bundle> results = new ArrayList<>();
-        for (PluginFile fi : files)
-            results.add(fi.getArgs());
-        return results;
     }
 
     public static class Builder {
