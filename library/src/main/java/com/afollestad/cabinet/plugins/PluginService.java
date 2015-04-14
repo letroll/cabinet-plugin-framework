@@ -183,7 +183,8 @@ public abstract class PluginService extends Service {
             ServiceInfo info = pm.getServiceInfo(getComponentName(), PackageManager.GET_SERVICES);
             PendingIntent mainIntent = PendingIntent.getActivity(this, 1001,
                     new Intent(Intent.ACTION_MAIN)
-                            .setComponent(new ComponentName("com.afollestad.cabinet", "com.afollestad.cabinet.ui.MainActivity")),
+                            .setComponent(new ComponentName("com.afollestad.cabinet", "com.afollestad.cabinet.ui.MainActivity"))
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                     PendingIntent.FLAG_CANCEL_CURRENT);
             PendingIntent exitIntent = PendingIntent.getService(this, 1002,
                     new Intent(EXIT_ACTION).setComponent(getComponentName()),
