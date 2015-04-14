@@ -28,6 +28,8 @@ public class ServiceExample extends PluginService {
                     .created(System.currentTimeMillis())
                     .modified(System.currentTimeMillis())
                     .isDir((i % 3) == 0)
+                    .hidden(false)
+                    .length(2048)
                     .build());
         }
         return results;
