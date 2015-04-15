@@ -15,12 +15,12 @@ public class AuthenticatorExample extends PluginAuthenticator {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authenticatorexample);
 
-        // Simulates a 3 second loading period
+        // Simulates a 7 second loading period
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(7000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
