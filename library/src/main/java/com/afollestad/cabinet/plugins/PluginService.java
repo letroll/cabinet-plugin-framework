@@ -19,6 +19,13 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 /**
+ * A PluginService is the heart of a plugin. It's started when a user of Cabinet taps on your plugin
+ * in the navigation drawer, and it's responsible for listing files and performing other file actions.
+ * <p/>
+ * If you return something greater than zero for getForegroundId(), the Service will run in foreground
+ * mode with a persistent notification until the user explicitly taps exit or you stop the service from within.
+ * Tapping the notification will bring the user to your plugin in Cabinet's main UI, also.
+ *
  * @author Aidan Follestad (afollestad)
  */
 public abstract class PluginService extends Service {
@@ -185,7 +192,7 @@ public abstract class PluginService extends Service {
     private void refreshNotification(String status) {
         if (status == null)
             status = getString(R.string.disconnected);
-        if (getForegroundId() != 0) {
+        if (getForegroundId() > 0) {
             try {
                 PackageManager pm = getPackageManager();
                 ServiceInfo info = pm.getServiceInfo(getComponentName(), PackageManager.GET_SERVICES);
@@ -256,7 +263,7 @@ public abstract class PluginService extends Service {
      * indefinitely until disconnection. If you have multiple services in your plugin, each need a
      * unique ID.
      * <p/>
-     * If you return 0, the service will not go into foreground mode. Without foreground mode, no
+     * If you <= 0, the service will not go into foreground mode. Without foreground mode, no
      * persistent notification is displayed, but the Service will be eventually killed by the system.
      */
     protected abstract int getForegroundId();
