@@ -182,6 +182,7 @@ public abstract class PluginService extends Service {
                 respond(mMessenger, PluginAction.DISCONNECT, null);
             stopForeground(true);
             stopSelf();
+            sendBroadcast(new Intent(EXIT_ACTION));
         } catch (Exception e) {
             log("Disconnect error: " + e.getLocalizedMessage());
             if (mMessenger != null)
