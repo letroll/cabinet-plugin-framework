@@ -185,27 +185,29 @@ public abstract class PluginService extends Service {
     private void refreshNotification(String status) {
         if (status == null)
             status = getString(R.string.disconnected);
-        try {
-            PackageManager pm = getPackageManager();
-            ServiceInfo info = pm.getServiceInfo(getComponentName(), PackageManager.GET_SERVICES);
-            PendingIntent mainIntent = PendingIntent.getActivity(this, 1001,
-                    new Intent(Intent.ACTION_MAIN)
-                            .setComponent(new ComponentName("com.afollestad.cabinet", "com.afollestad.cabinet.ui.MainActivity"))
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                    PendingIntent.FLAG_CANCEL_CURRENT);
-            PendingIntent exitIntent = PendingIntent.getService(this, 1002,
-                    new Intent(EXIT_ACTION).setComponent(getComponentName()),
-                    PendingIntent.FLAG_CANCEL_CURRENT);
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                    .setContentTitle(info.loadLabel(pm))
-                    .setContentText(status)
-                    .setSmallIcon(info.getIconResource())
-                    .setContentIntent(mainIntent)
-                    .addAction(R.drawable.ic_stat_navigation_close,
-                            getString(R.string.exit), exitIntent);
-            startForeground(getForegroundId(), builder.build());
-        } catch (Exception e) {
-            Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+        if (getForegroundId() != 0) {
+            try {
+                PackageManager pm = getPackageManager();
+                ServiceInfo info = pm.getServiceInfo(getComponentName(), PackageManager.GET_SERVICES);
+                PendingIntent mainIntent = PendingIntent.getActivity(this, 1001,
+                        new Intent(Intent.ACTION_MAIN)
+                                .setComponent(new ComponentName("com.afollestad.cabinet", "com.afollestad.cabinet.ui.MainActivity"))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        PendingIntent.FLAG_CANCEL_CURRENT);
+                PendingIntent exitIntent = PendingIntent.getService(this, 1002,
+                        new Intent(EXIT_ACTION).setComponent(getComponentName()),
+                        PendingIntent.FLAG_CANCEL_CURRENT);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                        .setContentTitle(info.loadLabel(pm))
+                        .setContentText(status)
+                        .setSmallIcon(info.getIconResource())
+                        .setContentIntent(mainIntent)
+                        .addAction(R.drawable.ic_stat_navigation_close,
+                                getString(R.string.exit), exitIntent);
+                startForeground(getForegroundId(), builder.build());
+            } catch (Exception e) {
+                Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -253,6 +255,9 @@ public abstract class PluginService extends Service {
      * The ID used for the persistent foreground notification that keeps the service running
      * indefinitely until disconnection. If you have multiple services in your plugin, each need a
      * unique ID.
+     * <p/>
+     * If you return 0, the service will not go into foreground mode. Without foreground mode, no
+     * persistent notification is displayed, but the Service will be eventually killed by the system.
      */
     protected abstract int getForegroundId();
 
